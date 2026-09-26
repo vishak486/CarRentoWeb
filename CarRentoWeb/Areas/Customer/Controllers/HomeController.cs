@@ -2,7 +2,7 @@ using System.Diagnostics;
 using CarRentoWeb.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CarRentoWeb.Controllers
+namespace CarRentoWeb.Areas.Customer.Controllers
 {
     public class HomeController : Controller
     {

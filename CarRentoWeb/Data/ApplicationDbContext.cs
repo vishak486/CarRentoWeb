@@ -8,5 +8,9 @@ namespace CarRentoWeb.Data
         {
             
         }
+
+        public DbContext MyProperty { get; set; }
+
+
     }
 }
