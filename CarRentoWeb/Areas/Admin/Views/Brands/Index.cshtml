@@ -1,0 +1,28 @@
+﻿@{
+    ViewData["Title"] = "Manage Brands";
+}
+
+<h1>Manage Brands</h1>
+
+<table id="brandTable" class="table table-striped" style="width:100%">
+    <thead>
+        <tr>
+            <th>Brand Name</th>
+            <th>Logo</th>
+            <th>Active</th>
+        </tr>
+    </thead>
+</table>
+
+@section Scripts{
+    <script>
+        new Datatables('#brandTable',{
+            ajax: { url: '/Admin/Brands/GetAll'},
+            columns:[
+                { data: 'brandName'},
+                { data: 'logoUrl'},
+                { data: 'isActive'},
+            ]
+        });
+    </script>
+}
