@@ -4,6 +4,14 @@
 
 <h1>Manage Brands</h1>
 
+<div class="row pt-4 pb-3">
+    <div class="col-6">
+    </div>
+    <div class="col-6 text-end">
+        <a asp-controller="Brands" asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Create New Brand</a>
+    </div>
+</div>
+
 <table id="brandTable" class="table table-striped" style="width:100%">
     <thead>
         <tr>
@@ -16,11 +24,11 @@
 
 @section Scripts{
     <script>
-        new Datatables('#brandTable',{
+        new DataTable('#brandTable',{
             ajax: { url: '/Admin/Brands/GetAll'},
             columns:[
                 { data: 'brandName'},
-                { data: 'logoUrl'},
+                { data: 'logoUrl', render: function(data) { return data ? '<img src="' + data + '" width="50" />' : ''; } },
                 { data: 'isActive'},
             ]
         });

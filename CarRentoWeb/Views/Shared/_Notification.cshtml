@@ -1,0 +1,16 @@
+﻿@if (TempData["success"] != null)
+{
+    <script type="text/javascript">
+        window.addEventListener('DOMContentLoaded', function() {
+            toastr.success('@TempData["success"]');
+        });
+    </script>
+}
+@if (TempData["error"] != null)
+{
+    <script type="text/javascript">
+        window.addEventListener('DOMContentLoaded', function() {
+            toastr.error('@TempData["error"]');
+        });
+    </script>
+}

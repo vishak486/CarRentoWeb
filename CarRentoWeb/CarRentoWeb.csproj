@@ -15,5 +15,9 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
+	
+<ItemGroup>
+  <Watch Remove="wwwroot/images/**/*" />
+</ItemGroup>
 
 </Project>
