@@ -12,6 +12,8 @@ namespace CarRentoWeb.Data
         }
 
         public DbSet<Brand> Brands { get; set; }
+        public DbSet<Car> Cars { get; set; }
+        public DbSet<CarImage> CarImages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
