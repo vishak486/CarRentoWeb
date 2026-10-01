@@ -69,5 +69,18 @@ namespace CarRentoWeb.Areas.Admin.Controllers
             }
             return View(obj);
         }
+        [HttpPost]
+        [IgnoreAntiforgeryToken]
+        public IActionResult ToggleStatus(int? id)
+        {
+            var brand = _context.Brands.Find(id);
+            if(brand==null)
+            {
+                return Json(new { success = false, message = "Brand not found" });
+            }
+            brand.IsActive = !brand.IsActive;
+            _context.SaveChanges();
+            return Json(new { success=true, isActive= brand.IsActive });
+        }
     }
 }

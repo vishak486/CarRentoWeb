@@ -2,35 +2,75 @@
     ViewData["Title"] = "Manage Brands";
 }
 
-<h1>Manage Brands</h1>
-
-<div class="row pt-4 pb-3">
-    <div class="col-6">
-    </div>
-    <div class="col-6 text-end">
-        <a asp-controller="Brands" asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Create New Brand</a>
+<div class="card shadow border-0 mt-4">
+	<div class="card-header bg-primary mt-0 py-3">
+		<div class="row">
+			<div class="col-12 text-center">
+				<h2 class="text-white">Brands List</h2>
+			</div>
+		</div>
+	</div>
+    <div class="card-body p-4">
+        <div class="row pt-4 pb-3">
+            <div class="col-6">
+            </div>
+            <div class="col-6 text-end">
+                <a asp-controller="Brands" asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Create New Brand</a>
+            </div>
+        </div>
+        <table id="brandTable" class="table table-striped" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Brand Name</th>
+                    <th>Logo</th>
+                    <th>Active</th>
+                </tr>
+            </thead>
+        </table>
     </div>
 </div>
 
-<table id="brandTable" class="table table-striped" style="width:100%">
-    <thead>
-        <tr>
-            <th>Brand Name</th>
-            <th>Logo</th>
-            <th>Active</th>
-        </tr>
-    </thead>
-</table>
+
+
 
 @section Scripts{
     <script>
-        new DataTable('#brandTable',{
+        var table=new DataTable('#brandTable',{
             ajax: { url: '/Admin/Brands/GetAll'},
             columns:[
                 { data: 'brandName'},
-                { data: 'logoUrl', render: function(data) { return data ? '<img src="' + data + '" width="50" />' : ''; } },
-                { data: 'isActive'},
+                { data: 'logoUrl', render: function(data) { return data ? '<img src="' + data + '" width="75" />' : ''; } },
+                {
+                    data: 'isActive',
+                    render: function (data, type, row) {
+                        if (data) {
+                            return '<button class="btn btn-success btn-sm toggle-status" data-id="' + row.brandId + '">Active</button>';
+                        } else {
+                            return '<button class="btn btn-danger btn-sm toggle-status" data-id="' + row.brandId + '">Inactive</button>';
+                        }
+                    }
+                }
             ]
+        });
+
+        document.addEventListener('click', function (e) {
+            if (e.target.classList.contains('toggle-status')) {
+                const id = e.target.dataset.id;
+                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+                fetch('/Admin/Brands/ToggleStatus/' + id, {
+                    method: 'POST',
+                    headers: { 'RequestVerificationToken': token }
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                       table.ajax.reload(null,false);
+                    } else {
+                        alert(result.message);
+                    }
+                });
+            }
         });
     </script>
 }
