@@ -25,7 +25,7 @@ namespace CarRentoWeb.Areas.Admin.Controllers
         [HttpGet]
         public IActionResult GetAll()
         {
-            List<Car> objCarList = _context.Cars.Include(c => c.Brand).ToList();
+            List<Car> objCarList = _context.Cars.Include(c => c.Brand).Include(c => c.CarImages).ToList();
             return Json(new { data = objCarList });
         }
 
@@ -89,6 +89,42 @@ namespace CarRentoWeb.Areas.Admin.Controllers
             }
             ViewBag.BrandList = _context.Brands.Where(b => b.IsActive).ToList();
             return View(obj);
+        }
+
+        public IActionResult Edit(int? id)
+        {
+            var car = _context.Cars.Find(id);
+            if (car == null) return NotFound();
+            ViewBag.BrandList = _context.Brands.Where(b => b.IsActive).ToList();
+            return View(car);
+        }
+
+        [HttpPost]
+        public IActionResult Edit(Car obj)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.Cars.Update(obj);
+                _context.SaveChanges();
+                TempData["success"] = "Car updated successfully";
+                return RedirectToAction("Index");
+            }
+            ViewBag.BrandList = _context.Brands.Where(b => b.IsActive).ToList();
+            return View(obj);
+        }
+
+        [HttpPost]
+        [IgnoreAntiforgeryToken]
+        public IActionResult UpdateStatus(int? id, string status)
+        {
+            var car = _context.Cars.Find(id);
+            if (car == null)
+            {
+                return Json(new { success = false, message = "Car not found" });
+            }
+            car.Status = status;
+            _context.SaveChanges();
+            return Json(new { success = true, status = car.Status });
         }
     }
 }

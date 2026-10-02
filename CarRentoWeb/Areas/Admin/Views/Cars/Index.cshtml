@@ -1,4 +1,4 @@
-﻿<div class="card shadow border-0 mt-4">
+﻿<div class="card shadow border-0 mt-4" style="min-width: 0;">
 	<div class="card-header bg-primary mt-0 py-3">
 		<div class="row">
 			<div class="col-12 text-center">
@@ -14,5 +14,82 @@
                 <a asp-controller="Cars" asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Create New Car</a>
             </div>
         </div>
+        
+        <div class="table-responsive">
+            <table id="carTable" class="table table-striped" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Car Name</th>
+                        <th>Brand</th>
+                        <th>Year</th>
+                        <th>Price/Day</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+            </table>
+
+        </div>
     </div>
 </div>
+
+@section Scripts{
+    <script>
+        var table=new DataTable('#carTable', {
+            ajax: { url: '/Admin/Cars/GetAll' },
+            columns: [
+                {
+                    data: 'carImages',
+                    orderable: false,
+                    render: function (data) {
+                        if (data && data.length > 0) {
+                            return '<img src="' + data[0].imageUrl + '" width="75" />';
+                        }
+                        return '';
+                    }
+                },
+                { data: 'carName' },
+                { data: 'brand.brandName' },
+                { data: 'year' },
+                { data: 'pricePerDay' },
+                { data: 'status' },
+                {
+                    data: null,
+                    orderable: false,
+                    render: function (data, type, row) {
+                        return '<a href="/Admin/Cars/Edit/' + row.carId + '" class="btn btn-sm btn-primary mb-1">Update Car</a>' +
+                            '<div class="d-flex gap-1">' +
+                            '<select class="form-select form-select-sm status-select" data-id="' + row.carId + '">' +
+                            '<option value="Available"' + (row.status === 'Available' ? ' selected' : '') + '>Available</option>' +
+                            '<option value="Rented"' + (row.status === 'Rented' ? ' selected' : '') + '>Rented</option>' +
+                            '<option value="Maintenance"' + (row.status === 'Maintenance' ? ' selected' : '') + '>Maintenance</option>' +
+                            '</select>' +
+                            '<button class="btn btn-sm btn-warning update-status-btn" data-id="' + row.carId + '">Update Status</button>' +
+                            '</div>';
+                    }
+                }
+            ]
+        });
+
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('update-status-btn')) {
+                const id = e.target.dataset.id;
+                const select = document.querySelector('.status-select[data-id="' + id + '"]');
+                const status = select.value;
+
+                fetch('/Admin/Cars/UpdateStatus/' + id + '?status=' + encodeURIComponent(status), {
+                    method: 'POST'
+                })
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.success) {
+                            table.ajax.reload(null, false);
+                        } else {
+                            alert(result.message);
+                        }
+                    });
+            }
+        });
+    </script>
+}
