@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
-using CarRentoWeb.Data;
+using CarRentoWeb.Models;
 
 namespace CarRentoWeb.Areas.Identity.Pages.Account.Manage;
 
