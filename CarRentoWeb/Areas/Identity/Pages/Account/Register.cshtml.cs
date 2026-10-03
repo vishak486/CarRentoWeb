@@ -18,6 +18,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using CarRentoWeb.Models;
+using CarRentoWeb.Utility;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace CarRentoWeb.Areas.Identity.Pages.Account;
 
@@ -25,6 +27,7 @@ public class RegisterModel : PageModel
 {
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly RoleManager<IdentityRole> _roleManager;
     private readonly IUserStore<ApplicationUser> _userStore;
     private readonly IUserEmailStore<ApplicationUser> _emailStore;
     private readonly ILogger<RegisterModel> _logger;
@@ -33,10 +36,12 @@ public class RegisterModel : PageModel
     public RegisterModel(
         UserManager<ApplicationUser> userManager,
         IUserStore<ApplicationUser> userStore,
+        RoleManager<IdentityRole> roleManager,
         SignInManager<ApplicationUser> signInManager,
         ILogger<RegisterModel> logger,
         IEmailSender emailSender)
     {
+        _roleManager = roleManager;
         _userManager = userManager;
         _userStore = userStore;
         _emailStore = GetEmailStore();
@@ -97,11 +102,21 @@ public class RegisterModel : PageModel
         [Display(Name = "Confirm password")]
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string? ConfirmPassword { get; set; }
+
+        //public string? Role { get; set; }
+
+        //public IEnumerable<SelectListItem>? RoleList { get; set; }
     }
 
 
     public async Task OnGetAsync(string? returnUrl = null)
     {
+        if (!await _roleManager.RoleExistsAsync(SD.Role_Admin))
+        {
+            await _roleManager.CreateAsync(new IdentityRole(SD.Role_Admin));
+            await _roleManager.CreateAsync(new IdentityRole(SD.Role_Customer));
+        }
+
         ReturnUrl = returnUrl;
         ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
     }
@@ -121,6 +136,17 @@ public class RegisterModel : PageModel
             if (result.Succeeded)
             {
                 _logger.LogInformation("User created a new account with password.");
+
+                //if (!string.IsNullOrEmpty(Input.Role))
+                //{
+                //    await _userManager.AddToRoleAsync(user, Input.Role);
+                //}
+                //else
+                //{
+                //    await _userManager.AddToRoleAsync(user, SD.Role_Customer);
+                //}
+                await _userManager.AddToRoleAsync(user, SD.Role_Customer);
+
 
                 var userId = await _userManager.GetUserIdAsync(user);
                 var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -151,6 +177,11 @@ public class RegisterModel : PageModel
         }
 
         // If we got this far, something failed, redisplay form
+        //Input.RoleList = _roleManager.Roles.Select(x => x.Name).Select(i => new SelectListItem
+        //{
+        //    Text = i,
+        //    Value = i
+        //});
         return Page();
     }
 
