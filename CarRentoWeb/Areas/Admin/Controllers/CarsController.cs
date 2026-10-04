@@ -1,11 +1,13 @@
 ﻿using CarRentoWeb.Data;
 using CarRentoWeb.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarRentoWeb.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = "Admin")]
     public class CarsController : Controller
     {
         private readonly ApplicationDbContext _context;
