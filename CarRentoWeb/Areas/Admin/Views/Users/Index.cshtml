@@ -1,0 +1,74 @@
+﻿@{
+	ViewData["Title"] = "Manage Customers";
+}
+
+<div class="card shadow border-0 mt-4" style="min-width: 0;">
+    <div class="card-header bg-primary mt-0 py-3">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h2 class="text-white fw-5">Customers List</h2>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-4">
+        <div class="table-responsive">
+            <table id="userTable" class="table table-striped" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+    var table=new DataTable('#userTable',{
+        ajax: { url: '/Admin/Users/GetAll' },
+        columns: [
+            { data: 'email' },
+            {
+                data: 'isLocked',
+                render: function (data) {
+                    return data
+                    ? '<span class="badge bg-danger">Locked</span>'
+                    : '<span class="badge bg-success">Active</span>';
+                }
+            },
+            {
+                data: null,
+                orderable: false,
+                render: function (data, type, row) {
+                    return row.isLocked
+                    ? '<button class="btn btn-sm btn-success unlock-btn" data-id="' + row.id + '">Unlock</button>'
+                    : '<button class="btn btn-sm btn-danger lock-btn" data-id="' + row.id + '">Lock</button>';
+                }
+            }
+        ]
+    });
+
+
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('lock-btn') || e.target.classList.contains('unlock-btn')) {
+            const id = e.target.dataset.id;
+            const action = e.target.classList.contains('lock-btn') ? 'Lock' : 'Unlock';
+
+            fetch('/Admin/Users/' + action + '?id=' + encodeURIComponent(id), {
+                method: 'POST'
+            })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        table.ajax.reload(null, false);
+                    } else {
+                        alert(result.message);
+                    }
+                });
+        }
+    });
+    </script>
+}
