@@ -1,0 +1,64 @@
+﻿@model Car
+
+<div class="container py-5">
+    <div class="row gy-4">
+        <div class="col-lg-6">
+            @if (Model.CarImages != null && Model.CarImages.Any())
+            {
+                <div id="carImageCarousel" class="carousel slide shadow-sm" data-bs-ride="carousel">
+                    <div class="carousel-inner rounded">
+                        @{
+                            var first = true;
+                        }
+                        @foreach (var img in Model.CarImages)
+                        {
+                            <div class="carousel-item @(first ? "active" : "")">
+                                <img src="@img.ImageUrl" class="d-block w-100" style="height: 450px; object-fit: cover;" alt="@Model.CarName" />
+                            </div>
+                            first = false;
+                        }
+                    </div>
+
+                    @if (Model.CarImages.Count() > 1)
+                    {
+                        <button class="carousel-control-prev" type="button" data-bs-target="#carImageCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon"></span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#carImageCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon"></span>
+                        </button>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 350px;">
+                    <span class="text-muted">No images available</span>
+                </div>
+            }
+        </div>
+
+        <div class="col-lg-6">
+            <h2 class="fw-bold">@Model.CarName</h2>
+            <p class="text-muted">@Model.Brand?.BrandName</p>
+
+            <table class="table table-borderless mt-3">
+                <tbody>
+                    <tr><th>Model</th><td>@Model.Model</td></tr>
+                    <tr><th>Year</th><td>@Model.Year</td></tr>
+                    <tr><th>Transmission</th><td>@Model.Transmission</td></tr>
+                    <tr><th>Fuel Type</th><td>@Model.FuelType</td></tr>
+                    <tr><th>Seating Capacity</th><td>@Model.SeatingCapacity</td></tr>
+                    <tr><th>Status</th><td><span class="badge bg-success">@Model.Status</span></td></tr>
+                </tbody>
+            </table>
+
+            <h4 class="fw-bold text-primary mb-4">₹@Model.PricePerDay.ToString("N2") / day</h4>
+
+            <button class="btn btn-primary btn-lg w-100" disabled>Add to Cart</button>
+            <p class="text-muted small mt-2">(Cart coming soon)</p>
+
+            <a asp-controller="Cars" asp-action="Index" asp-route-brandId="@Model.BrandId" class="btn btn-outline-secondary w-100 mt-2">Back to @Model.Brand?.BrandName Cars</a>
+        </div>
+    </div>
+</div>

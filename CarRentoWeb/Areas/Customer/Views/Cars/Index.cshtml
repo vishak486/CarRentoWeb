@@ -1,0 +1,35 @@
+﻿@model List<Car>
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">@ViewBag.BrandName Cars</h2>
+        <a asp-controller="Brands" asp-action="Index" class="btn btn-outline-primary">Back to Brands</a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <p class="text-muted">No cars currently available under this brand.</p>
+    }
+
+    <div class="row gy-4">
+        @foreach (var car in Model)
+        {
+            var firstImage = car.CarImages != null && car.CarImages.Any() ? car.CarImages.First().ImageUrl : null;
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow-sm">
+                    @if (!string.IsNullOrEmpty(firstImage))
+                    {
+                        <img src="@firstImage" class="card-img-top" style="height: 200px; object-fit: cover;" alt="@car.CarName" />
+                    }
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold">@car.CarName</h5>
+                        <p class="card-text text-muted mb-1">@car.Model &middot; @car.Year</p>
+                        <p class="card-text fw-bold text-primary">₹@car.PricePerDay.ToString("N2") / day</p>
+                        <a asp-controller="Cars" asp-action="Details" asp-route-id="@car.CarId" class="btn btn-primary w-100">View Details</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+

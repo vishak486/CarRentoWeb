@@ -1,0 +1,27 @@
+﻿@model List<Brand>
+@{
+	ViewData["Title"] = "Browse by Brand";
+}
+
+<div class="container py-5">
+    <h2 class="fw-bold text-center mb-5">Browse Cars by Brand</h2>
+
+    <div class="row gy-4">
+        @foreach (var brand in Model)
+        {
+            <div class="col-lg-3 col-md-4 col-6">
+                <a asp-controller="Cars" asp-action="Index" asp-route-brandId="@brand.BrandId" class="text-decoration-none">
+                    <div class="card h-100 border-1 shadow-md link-opacity-25-hover text-center">
+                        <div class="card-body d-flex flex-column align-items-center justify-content-center p-4">
+                            @if (!string.IsNullOrEmpty(brand.LogoUrl))
+                            {
+                                <img src="@brand.LogoUrl" alt="@brand.BrandName" class="img-fluid mb-3 w-100" style="max-height: 180px;" />
+                            }
+                            <h5 class="fw-bold text-dark">@brand.BrandName</h5>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        }
+    </div>
+</div>
