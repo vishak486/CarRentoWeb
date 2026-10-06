@@ -59,6 +59,18 @@ public class IndexModel : PageModel
         [Phone]
         [Display(Name = "Phone number")]
         public string? PhoneNumber { get; set; }
+
+        [Required]
+        [Display(Name = "Full Name")]
+        public string? FullName { get; set; }
+
+        [Required]
+        [Display(Name = "Address")]
+        public string? Address { get; set; }
+
+        [Required]
+        [Display(Name = "Driving License Number")]
+        public string? DrivingLicenseNo { get; set; }
     }
 
     private async Task LoadAsync(ApplicationUser user)
@@ -70,7 +82,10 @@ public class IndexModel : PageModel
 
         Input = new InputModel
         {
-            PhoneNumber = phoneNumber
+            PhoneNumber = phoneNumber,
+            FullName=user.FullName,
+            Address=user.Address,
+            DrivingLicenseNo=user.DrivingLicenseNo
         };
     }
 
@@ -110,6 +125,11 @@ public class IndexModel : PageModel
                 return RedirectToPage();
             }
         }
+
+        user.FullName = Input.FullName;
+        user.Address = Input.Address;
+        user.DrivingLicenseNo = Input.DrivingLicenseNo;
+        await _userManager.UpdateAsync(user);
 
         await _signInManager.RefreshSignInAsync(user);
         StatusMessage = "Your profile has been updated";

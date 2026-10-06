@@ -1,4 +1,6 @@
 ﻿using CarRentoWeb.Data;
+using CarRentoWeb.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,9 +10,11 @@ namespace CarRentoWeb.Areas.Customer.Controllers
     public class CarsController : Controller
     {
         private readonly ApplicationDbContext _context;
-        public CarsController(ApplicationDbContext context)
+        private readonly UserManager<ApplicationUser> _userManager;
+        public CarsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         public IActionResult Index(int? brandId)
@@ -32,6 +36,23 @@ namespace CarRentoWeb.Areas.Customer.Controllers
                 .FirstOrDefault(c => c.CarId == id);
 
             if (car == null) return NotFound();
+
+            bool isProfileComplete = false;
+
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                var userId = _userManager.GetUserId(User);
+                var user = _context.Users.FirstOrDefault(u => u.Id == userId);
+
+                if (user != null)
+                {
+                    isProfileComplete = !string.IsNullOrWhiteSpace(user.FullName)
+                        && !string.IsNullOrWhiteSpace(user.Address)
+                        && !string.IsNullOrWhiteSpace(user.DrivingLicenseNo)
+                        && !string.IsNullOrWhiteSpace(user.PhoneNumber);
+                }
+            }
+            ViewBag.IsProfileComplete = isProfileComplete;
 
             return View(car);
         }
