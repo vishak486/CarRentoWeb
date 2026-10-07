@@ -1,0 +1,107 @@
+﻿@model List<CartItem>
+
+@{
+	ViewData["Title"] = "My Cart";
+	decimal grandTotal = 0;
+}
+
+<div class="card shadow border-0 mt-4 w-100">
+    <div class="card-header bg-primary mt-0 py-3">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h2 class="text-white fw-bold">My Cart</h2>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-4">
+        <div class="row pt-4 pb-3">
+            <div class="col-6">
+            </div>
+            <div class="col-6 text-end">
+                <a asp-controller="Cart" asp-action="Index" class="btn btn-outline-dark"><i class="bi bi-plus-circle"></i> Back to Brands</a>
+            </div>
+        </div>
+        <div class="container py-5">
+
+            @if (!Model.Any())
+            {
+                <p class="text-muted">Your cart is empty.</p>
+                <a asp-area="Customer" asp-controller="Brands" asp-action="Index" class="btn btn-primary">Browse Cars</a>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Car</th>
+                                <th>Dates</th>
+                                <th>Days</th>
+                                <th>Price/Day</th>
+                                <th>Subtotal</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                var days = (item.RentalEndDate - item.RentalStartDate).Days;
+                                var subtotal = days * item.PricePerDay;
+                                grandTotal += subtotal;
+                                var firstImage = item.Car?.CarImages != null && item.Car.CarImages.Any() ? item.Car.CarImages.First().ImageUrl : null;
+
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            @if (!string.IsNullOrEmpty(firstImage))
+                                            {
+                                                <img src="@firstImage" style="width: 70px; height: 50px; object-fit: cover;" class="rounded" />
+                                            }
+                                            <div>
+                                                <div class="fw-bold">@item.Car?.CarName</div>
+                                                <div class="text-muted small">@item.Car?.Brand?.BrandName</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>@item.RentalStartDate.ToString("dd MMM yyyy") - @item.RentalEndDate.ToString("dd MMM yyyy")</td>
+                                    <td>@days</td>
+                                    <td>₹@item.PricePerDay.ToString("N2")</td>
+                                    <td>₹@subtotal.ToString("N2")</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-danger remove-btn" data-id="@item.CartItemId">Remove</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="text-end">
+                    <h4 class="fw-bold">Grand Total: ₹@grandTotal.ToString("N2")</h4>
+                    <button class="btn btn-success btn-lg mt-2" disabled>Proceed to Checkout</button>
+                    <p class="text-muted small">(Checkout / Razorpay coming soon)</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-btn')) {
+                const id = e.target.dataset.id;
+                fetch('/Customer/Cart/Remove?id=' + id, { method: 'POST' })
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.success) {
+                            location.reload();
+                        } else {
+                            alert(result.message);
+                        }
+                    });
+            }
+        });
+    </script>
+}

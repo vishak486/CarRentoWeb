@@ -54,6 +54,14 @@
             </table>
 
             <h4 class="fw-bold text-primary mb-4">₹@Model.PricePerDay.ToString("N2") / day</h4>
+            <div class="mb-3">
+                <label class="form-label">Rental Start Date</label>
+                <input type="date" id="rentalStartDate" class="form-control" min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Rental End Date</label>
+                <input type="date" id="rentalEndDate" class="form-control" min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+            </div>
 
             @if (User.Identity != null && User.Identity.IsAuthenticated)
             {
@@ -77,3 +85,32 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('click', function (e) {
+            if (e.target.id === 'addToCartBtn') {
+                const carId = e.target.dataset.carId;
+                const startDate = document.getElementById('rentalStartDate').value;
+                const endDate = document.getElementById('rentalEndDate').value;
+
+                if (!startDate || !endDate) {
+                    alert('Please select both rental start and end dates.');
+                    return;
+                }
+
+                fetch('/Customer/Cars/AddToCart?carId=' + carId + '&startDate=' + startDate + '&endDate=' + endDate, {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        window.location.href = '/Customer/Cart';
+                    } else {
+                        alert(result.message);
+                    }
+                });
+            }
+        });
+    </script>
+}
