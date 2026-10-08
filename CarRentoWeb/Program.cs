@@ -26,6 +26,15 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/Identity/Account/AccessDenied";
 });
 
+// Bind Razorpay options from configuration
+builder.Services.Configure<RazorpayOptions>(builder.Configuration.GetSection("Razorpay"));
+
+// Register services
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IRazorpayService, RazorpayService>();
+// HttpClient used by RazorpayService
+builder.Services.AddHttpClient<IRazorpayService, RazorpayService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

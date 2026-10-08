@@ -1,0 +1,87 @@
+﻿@page
+@model CarRentoWeb.Areas.Customer.Pages.Checkout.IndexModel
+@{
+    ViewData["Title"] = "Checkout";
+}
+<form method="post" style="display:none">
+    @Html.AntiForgeryToken()
+</form>
+
+<div class="card shadow border-0 mt-4 w-100">
+    <div class="card-header bg-primary mt-0 py-3">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h2 class="text-white fw-bold">Checkout</h2>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-4">
+        <div class="row pt-4 pb-3">
+            <div class="col-6">
+            </div>
+            <div class="col-6 text-end">
+                <div id="checkoutSummary">
+                    <p>When you click Pay, we'll create the order and open Razorpay Checkout.</p>
+                    <button id="payBtn" class="btn w-100 btn-success">Pay</button>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+
+@section Scripts{
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    document.getElementById('payBtn').addEventListener('click', async () => {
+        const createResp = await fetch('?handler=CreateOrder', {
+            method: 'POST',
+            headers: { 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || '' }
+        });
+        const data = await createResp.json();
+        if (!data || !data.providerOrderId) {
+            alert('Failed to create order');
+            return;
+        }
+
+        const options = {
+            "key": data.key,
+            "amount": data.amount,
+            "currency": "INR",
+            "name": "CarRentoWeb",
+            "description": "Order #" + data.orderId,
+            "order_id": data.providerOrderId,
+            "handler": async function (response) {
+                // send to server to verify and finalize
+                const form = new FormData();
+                form.append('orderId', data.orderId);
+                form.append('providerPaymentId', response.razorpay_payment_id);
+                form.append('providerOrderId', response.razorpay_order_id);
+                form.append('signature', response.razorpay_signature);
+
+                const verifyResp = await fetch('?handler=Confirm', {
+                    method: 'POST',
+                    body: form,
+                    headers: { 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || '' }
+                });
+                const verifyResult = await verifyResp.json();
+                if (verifyResult.success) {
+                        window.location.href = '/Customer/Order/Success?orderId=' + data.orderId;
+                } else {
+                    alert('Payment verification failed: ' + (verifyResult.message || ''));
+                }
+            },
+            "prefill": {
+                "email": "@User.Identity?.Name"
+            },
+            "theme": {
+                "color": "#0d6efd"
+            }
+        };
+        var rzp = new Razorpay(options);
+        rzp.open();
+    });
+</script>
+}

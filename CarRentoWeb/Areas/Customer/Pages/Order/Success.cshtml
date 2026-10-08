@@ -1,0 +1,28 @@
+﻿@page
+@model CarRentoWeb.Areas.Customer.Pages.Order.SuccessModel
+@{
+    ViewData["Title"] = "Order Success";
+}
+
+<div class="card shadow border-0 mt-4 w-100">
+    <div class="card-header bg-success mt-0 py-3">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h2 class="text-white fw-bold">Payment Successful</h2>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-4 text-center">
+        <p class="lead">Thank you! Your payment was successful and your order has been placed.</p>
+
+        @if (Model.OrderId.HasValue)
+        {
+            <p>Order Number: <strong>@Model.OrderId</strong></p>
+        }
+
+        <div class="mt-4">
+            <a asp-area="Customer" asp-controller="Home" asp-action="Index" class="btn btn-primary">Back to Home</a>
+            <a asp-area="Customer" asp-page="/Order/Details" asp-route-id="@Model.OrderId" class="btn btn-outline-secondary ms-2">View Order</a>
+        </div>
+    </div>
+</div>
