@@ -75,12 +75,19 @@ namespace CarRentoWeb.Areas.Customer.Controllers
             {
                 return Json(new { success = false, message = "Car not found." });
             }
-            bool hasOverlap = _context.CartItems
-            .Any(ci => ci.CarId == carId
-            && startDate < ci.RentalEndDate
-            && endDate > ci.RentalStartDate);
 
-            if (hasOverlap)
+            bool overlapsCart = _context.CartItems
+            .Any(ci => ci.CarId == carId
+                && startDate < ci.RentalEndDate
+                && endDate > ci.RentalStartDate);
+
+            bool overlapsPaidOrder = _context.OrderItems
+                .Any(oi => oi.CarId == carId
+                    && oi.Order!.Status == OrderStatus.Completed
+                    && startDate < oi.RentalEndDate
+                    && endDate > oi.RentalStartDate);
+
+            if (overlapsCart || overlapsPaidOrder)
             {
                 return Json(new { success = false, message = "This car is already reserved for part of your selected dates. Please choose different dates." });
             }

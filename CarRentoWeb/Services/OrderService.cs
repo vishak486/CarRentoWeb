@@ -22,6 +22,19 @@ namespace CarRentoWeb.Services
             if (cartItems.Count == 0)
                 throw new InvalidOperationException("Cart is empty");
 
+            foreach (var ci in cartItems)
+            {
+                bool alreadyBooked = await _db.OrderItems
+                    .AnyAsync(oi => oi.CarId == ci.CarId
+                        && oi.Order!.Status == OrderStatus.Completed
+                        && ci.RentalStartDate < oi.RentalEndDate
+                        && ci.RentalEndDate > oi.RentalStartDate);
+
+                if (alreadyBooked)
+                    throw new InvalidOperationException(
+                        $"{ci.Car?.CarName} was just booked by another customer for your dates. Please remove it from your cart and choose different dates.");
+            }
+
             var order = new Order
             {
                 UserId = userId,

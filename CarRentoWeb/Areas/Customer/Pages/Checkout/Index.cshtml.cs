@@ -38,8 +38,16 @@ namespace CarRentoWeb.Areas.Customer.Pages.Checkout
         public async Task<IActionResult> OnPostCreateOrderAsync()
         {
             var userId = _userManager.GetUserId(User) ?? throw new InvalidOperationException("User not found");
-            var order = await _orderService.CreateOrderFromCartAsync(userId);
 
+            OrderModel order;
+            try
+            {
+                order = await _orderService.CreateOrderFromCartAsync(userId);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return new JsonResult(new { success = false, message = ex.Message });
+            }
             // razorpay expects amount in paise (INR * 100)
             var amountInPaise = (long)(order.Total * 100m);
             var receipt = $"order_{order.OrderId}";

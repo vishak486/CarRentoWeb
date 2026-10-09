@@ -19,7 +19,7 @@
         <div class="row pt-4 pb-3">
             <div class="col-md-12 text-end">
                 <div id="checkoutSummary">
-                    <p>When you click Pay, we'll create the order and open Razorpay Checkout.</p>
+                    <p class="text-center">When you click Pay, we'll create the order and open Razorpay Checkout.</p>
                     <button id="payBtn" class="btn w-100 btn-success">Pay</button>
                 </div>
             </div>
@@ -40,7 +40,7 @@
         });
         const data = await createResp.json();
         if (!data || !data.providerOrderId) {
-            alert('Failed to create order');
+                alert(data?.message || 'Failed to create order');
             return;
         }
 
