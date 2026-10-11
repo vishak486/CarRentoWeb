@@ -3,6 +3,7 @@ using CarRentoWeb.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using CarRentoWeb.Services;
 
 namespace CarRentoWeb.Areas.Admin.Controllers
 {
@@ -11,10 +12,12 @@ namespace CarRentoWeb.Areas.Admin.Controllers
     public class OrdersController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IOrderPdfService _pdfService;
 
-        public OrdersController(ApplicationDbContext context)
+        public OrdersController(ApplicationDbContext context, IOrderPdfService pdfService)
         {
             _context = context;
+            _pdfService = pdfService;
         }
 
         public IActionResult Index()
@@ -43,6 +46,22 @@ namespace CarRentoWeb.Areas.Admin.Controllers
                 });
 
             return Json(new { data = orders });
+        }
+
+        [HttpGet]
+        public IActionResult DownloadPdf(int id)
+        {
+            var order = _context.Orders
+                .Include(o => o.User)
+                .Include(o => o.Payment)
+                .Include(o => o.OrderItems!).ThenInclude(oi => oi.Car).ThenInclude(c => c!.Brand)
+                .Include(o => o.OrderItems!).ThenInclude(oi => oi.Car).ThenInclude(c => c!.CarImages)
+                .FirstOrDefault(o => o.OrderId == id);
+
+            if (order == null) return NotFound();
+
+            var pdf = _pdfService.Generate(order);
+            return File(pdf, "application/pdf", $"Order-{order.OrderId}.pdf");
         }
     }
 }

@@ -37,6 +37,7 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IRazorpayService, RazorpayService>();
 // HttpClient used by RazorpayService
 builder.Services.AddHttpClient<IRazorpayService, RazorpayService>();
+builder.Services.AddScoped<IOrderPdfService, OrderPdfService>();
 
 var app = builder.Build();
 

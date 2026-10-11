@@ -43,6 +43,9 @@
                                 <td><span class="badge bg-success">@order.Status</span></td>
                                 <td>
                                     <a asp-area="Customer" asp-page="/Order/Details" asp-route-id="@order.OrderId" class="btn btn-sm btn-primary">View</a>
+                                    <a asp-area="Customer" asp-page="/Order/Details" asp-page-handler="DownloadPdf" asp-route-id="@order.OrderId" class="btn btn-sm btn-danger">
+                                        <i class="bi bi-file-earmark-pdf"></i> PDF
+                                    </a>
                                 </td>
                             </tr>
                         }

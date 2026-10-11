@@ -21,6 +21,7 @@
                         <th>Placed On</th>
                         <th>Total</th>
                         <th>Status</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
             </table>
@@ -45,6 +46,13 @@
                 {
                     data: 'status',
                     render: function(data) { return '<span class="badge bg-success">' + data + '</span>'; }
+                },
+                {
+                    data: 'orderId',
+                    orderable: false,
+                    render: function (data) {
+                        return '<a href="/Admin/Orders/DownloadPdf/' + data + '" class="btn btn-sm btn-danger"><i class="bi bi-file-earmark-pdf"></i> PDF</a>';
+                    }
                 }
             ]
         });
