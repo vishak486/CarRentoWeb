@@ -46,6 +46,9 @@
                             <li class="nav-item">
                                 <a class="nav-link fw-semibold text-white" asp-area="Admin" asp-controller="Orders" asp-action="Index">Manage Orders</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link fw-semibold text-white" asp-area="Admin" asp-controller="Contacts" asp-action="Index">Manage Contacts</a>
+                            </li>
                         }
 
                         @if (User.Identity == null || !User.Identity.IsAuthenticated || !User.IsInRole("Admin"))
