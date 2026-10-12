@@ -29,6 +29,8 @@ namespace CarRentoWeb.Models
         public OrderStatus Status { get; set; } = OrderStatus.Pending;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        public DateTime? ReturnedAt { get; set; }
+
         public ICollection<OrderItem>? OrderItems { get; set; }
         public Payment? Payment { get; set; }
     }

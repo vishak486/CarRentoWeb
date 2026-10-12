@@ -1,5 +1,7 @@
 ﻿@model List<CartItem>
 
+@Html.AntiForgeryToken()
+
 @{
 	ViewData["Title"] = "My Cart";
 	decimal grandTotal = 0;
@@ -91,7 +93,11 @@
         document.addEventListener('click', function(e) {
             if (e.target.classList.contains('remove-btn')) {
                 const id = e.target.dataset.id;
-                fetch('/Customer/Cart/Remove?id=' + id, { method: 'POST' })
+                fetch('/Customer/Cart/Remove?id=' + id, { method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    }
+                })
                     .then(response => response.json())
                     .then(result => {
                         if (result.success) {

@@ -30,7 +30,7 @@ namespace CarRentoWeb.Areas.Customer.Controllers
             return View(cartItems);
         }
         [HttpPost]
-        [IgnoreAntiforgeryToken]
+        [ValidateAntiForgeryToken]
         public IActionResult Remove(int id)
         {
             var userId = _userManager.GetUserId(User);

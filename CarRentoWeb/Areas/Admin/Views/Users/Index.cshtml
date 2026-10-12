@@ -2,6 +2,8 @@
 	ViewData["Title"] = "Manage Customers";
 }
 
+@Html.AntiForgeryToken()
+
 <div class="card shadow border-0 mt-4" style="min-width: 0;">
     <div class="card-header bg-primary mt-0 py-3">
         <div class="row">
@@ -58,7 +60,10 @@
             const action = e.target.classList.contains('lock-btn') ? 'Lock' : 'Unlock';
 
             fetch('/Admin/Users/' + action + '?id=' + encodeURIComponent(id), {
-                method: 'POST'
+                method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    }
             })
                 .then(response => response.json())
                 .then(result => {

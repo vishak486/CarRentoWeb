@@ -33,7 +33,7 @@ namespace CarRentoWeb.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        [IgnoreAntiforgeryToken]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Lock(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
@@ -49,7 +49,7 @@ namespace CarRentoWeb.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        [IgnoreAntiforgeryToken]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Unlock(string id)
         {
             var user = await _userManager.FindByIdAsync(id);

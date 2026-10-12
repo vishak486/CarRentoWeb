@@ -58,7 +58,7 @@ namespace CarRentoWeb.Areas.Customer.Controllers
         }
 
         [HttpPost]
-        [IgnoreAntiforgeryToken]
+        [ValidateAntiForgeryToken]
         public IActionResult AddToCart(int? carId,DateTime startDate,DateTime endDate)
         {
             if (User.Identity == null || !User.Identity.IsAuthenticated)

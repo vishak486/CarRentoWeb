@@ -116,7 +116,7 @@ namespace CarRentoWeb.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        [IgnoreAntiforgeryToken]
+        [ValidateAntiForgeryToken]
         public IActionResult UpdateStatus(int? id, string status)
         {
             var car = _context.Cars.Find(id);

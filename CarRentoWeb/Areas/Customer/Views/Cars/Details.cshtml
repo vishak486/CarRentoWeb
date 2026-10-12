@@ -1,5 +1,7 @@
 ﻿@model Car
 
+@Html.AntiForgeryToken()
+
 <div class="container py-5">
     <div class="row gy-4">
         <div class="col-lg-6">
@@ -100,7 +102,10 @@
                 }
 
                 fetch('/Customer/Cars/AddToCart?carId=' + carId + '&startDate=' + startDate + '&endDate=' + endDate, {
-                    method: 'POST'
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    }
                 })
                 .then(response => response.json())
                 .then(result => {

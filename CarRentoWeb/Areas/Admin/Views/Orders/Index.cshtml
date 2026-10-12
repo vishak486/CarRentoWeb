@@ -2,6 +2,8 @@
     ViewData["Title"] = "Manage Orders";
 }
 
+@Html.AntiForgeryToken()
+
 <div class="card shadow border-0 mt-4" style="min-width: 0;">
     <div class="card-header bg-primary mt-0 py-3">
         <div class="row">
@@ -21,6 +23,7 @@
                         <th>Placed On</th>
                         <th>Total</th>
                         <th>Status</th>
+                        <th>Car Returned</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -31,6 +34,7 @@
 
 @section Scripts {
     <script>
+        const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
         var table = new DataTable('#orderTable', {
             ajax: { url: '/Admin/Orders/GetAll' },
             order: [[0, 'desc']],
@@ -45,16 +49,70 @@
                 },
                 {
                     data: 'status',
-                    render: function(data) { return '<span class="badge bg-success">' + data + '</span>'; }
+                    render: function(data) {
+                        var cls = data === 'Completed' ? 'bg-success' : 'bg-danger';
+                        return '<span class="badge ' + cls + '">' + data + '</span>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function(data, type, row) {
+                        if (row.status === 'Cancelled') return '-';
+                        return row.returned
+                            ? '<span class="badge bg-info text-dark">Returned ' + row.returnedAt + '</span>'
+                            : '<span class="badge bg-warning text-dark">With customer</span>';
+                    }
                 },
                 {
                     data: 'orderId',
                     orderable: false,
-                    render: function (data) {
-                        return '<a href="/Admin/Orders/DownloadPdf/' + data + '" class="btn btn-sm btn-danger"><i class="bi bi-file-earmark-pdf"></i> PDF</a>';
+                    render: function(data, type, row) {
+                        var html = '<a href="/Admin/Orders/DownloadPdf/' + row.orderId + '" class="btn btn-sm btn-danger mb-1"><i class="bi bi-file-earmark-pdf"></i> PDF</a> ';
+
+                        if (row.status === 'Completed' && !row.returned) {
+                            html += '<button class="btn btn-sm btn-success mb-1 return-btn" data-id="' + row.orderId + '">Mark Returned</button> ';
+                            html += '<button class="btn btn-sm btn-outline-danger mb-1 cancel-btn" data-id="' + row.orderId + '">Cancel</button>';
+                        }
+                        return html;
                     }
                 }
             ]
+        });
+
+        function postAction(url, successMessage) {
+            fetch(url, {
+                method: 'POST',
+                headers: { 'RequestVerificationToken': token }
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error('Request failed (' + response.status + ')');
+                    return response.json();
+                })
+                .then(result => {
+                    if (result.success) {
+                        toastr.success(successMessage);
+                        table.ajax.reload(null, false);
+                    } else {
+                        toastr.error(result.message);
+                    }
+                })
+                .catch(err => toastr.error(err.message));
+        }
+
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('return-btn')) {
+                var id = e.target.dataset.id;
+                if (confirm('Mark order #' + id + ' as returned?')) {
+                    postAction('/Admin/Orders/MarkReturned/' + id, 'Order marked as returned');
+                }
+            }
+
+            if (e.target.classList.contains('cancel-btn')) {
+                var id = e.target.dataset.id;
+                if (confirm('Cancel order #' + id + '? The payment will be marked as refunded.')) {
+                    postAction('/Admin/Orders/Cancel/' + id, 'Order cancelled');
+                }
+            }
         });
     </script>
 }

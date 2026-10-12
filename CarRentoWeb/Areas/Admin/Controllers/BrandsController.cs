@@ -72,7 +72,7 @@ namespace CarRentoWeb.Areas.Admin.Controllers
             return View(obj);
         }
         [HttpPost]
-        [IgnoreAntiforgeryToken]
+        [ValidateAntiForgeryToken]
         public IActionResult ToggleStatus(int? id)
         {
             var brand = _context.Brands.Find(id);
