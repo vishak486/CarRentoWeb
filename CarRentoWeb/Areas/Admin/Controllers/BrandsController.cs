@@ -2,6 +2,7 @@
 using CarRentoWeb.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace CarRentoWeb.Areas.Admin.Controllers
 {
@@ -11,10 +12,13 @@ namespace CarRentoWeb.Areas.Admin.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _webHostEnvironment;
-        public BrandsController(ApplicationDbContext context,IWebHostEnvironment webHostEnvironment)
+        private readonly IMemoryCache _cache;
+
+        public BrandsController(ApplicationDbContext context,IWebHostEnvironment webHostEnvironment, IMemoryCache cache)
         {
             _context = context;
             _webHostEnvironment = webHostEnvironment;
+            _cache = cache;
         }
         public IActionResult Index()
         {
@@ -66,6 +70,7 @@ namespace CarRentoWeb.Areas.Admin.Controllers
                 }
                 _context.Brands.Add(obj);
                 _context.SaveChanges();
+                _cache.Remove(CarRentoWeb.Areas.Customer.Controllers.BrandsController.ActiveBrandsCacheKey);
                 TempData["success"] = "Brand created successfully";
                 return RedirectToAction("Index");
             }
@@ -82,6 +87,7 @@ namespace CarRentoWeb.Areas.Admin.Controllers
             }
             brand.IsActive = !brand.IsActive;
             _context.SaveChanges();
+            _cache.Remove(CarRentoWeb.Areas.Customer.Controllers.BrandsController.ActiveBrandsCacheKey);
             return Json(new { success=true, isActive= brand.IsActive });
         }
     }

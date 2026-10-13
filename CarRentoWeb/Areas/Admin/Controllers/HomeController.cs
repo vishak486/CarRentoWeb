@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace CarRentoWeb.Areas.Admin.Controllers
 {
@@ -14,16 +15,31 @@ namespace CarRentoWeb.Areas.Admin.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IMemoryCache _cache;
 
-        public HomeController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        private const string DashboardCacheKey = "AdminDashboard";
+
+        public HomeController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IMemoryCache cache)
         {
             _context = context;
             _userManager = userManager;
+            _cache = cache;
         }
 
         public async Task<IActionResult> Index()
         {
-            var paidOrders = _context.Orders.Where(o => o.Status == OrderStatus.Completed);
+            if (!_cache.TryGetValue(DashboardCacheKey, out DashboardViewModel? model))
+            {
+                model = await BuildDashboardAsync();
+                _cache.Set(DashboardCacheKey, model, TimeSpan.FromMinutes(2));
+            }
+
+            return View(model);
+        }
+
+        private async Task<DashboardViewModel> BuildDashboardAsync()
+        {
+            var paidOrders = _context.Orders.AsNoTracking().Where(o => o.Status == OrderStatus.Completed);
 
             var customers = await _userManager.GetUsersInRoleAsync(SD.Role_Customer);
 
@@ -74,7 +90,7 @@ namespace CarRentoWeb.Areas.Admin.Controllers
             model.TopCarLabels = topCars.Select(x => x.CarName).ToList();
             model.TopCarValues = topCars.Select(x => x.Bookings).ToList();
 
-            return View(model);
+            return model;
         }
     }
 }

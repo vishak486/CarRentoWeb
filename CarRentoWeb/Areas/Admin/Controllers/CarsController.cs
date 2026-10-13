@@ -3,6 +3,7 @@ using CarRentoWeb.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace CarRentoWeb.Areas.Admin.Controllers
 {
@@ -12,11 +13,13 @@ namespace CarRentoWeb.Areas.Admin.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IMemoryCache _cache;
 
-        public CarsController(ApplicationDbContext context,IWebHostEnvironment webHostEnvironment)
+        public CarsController(ApplicationDbContext context,IWebHostEnvironment webHostEnvironment, IMemoryCache cache)
         {
             _context = context;
             _webHostEnvironment = webHostEnvironment;
+            _cache = cache;
         }
 
         public IActionResult Index()
@@ -85,6 +88,7 @@ namespace CarRentoWeb.Areas.Admin.Controllers
                     _context.CarImages.Add(new CarImage { CarId = obj.CarId, ImageUrl = path });
                 }
                 _context.SaveChanges();
+                _cache.Remove(CarRentoWeb.Areas.Customer.Controllers.CarsController.CarsByBrandCacheKey(obj.BrandId));
 
                 TempData["success"] = "Car created successfully";
                 return RedirectToAction("Index");
@@ -106,8 +110,14 @@ namespace CarRentoWeb.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
+                var oldBrandId = _context.Cars.AsNoTracking()
+                .Where(c => c.CarId == obj.CarId).Select(c => c.BrandId).FirstOrDefault();
+
                 _context.Cars.Update(obj);
                 _context.SaveChanges();
+
+                _cache.Remove(CarRentoWeb.Areas.Customer.Controllers.CarsController.CarsByBrandCacheKey(oldBrandId));
+                _cache.Remove(CarRentoWeb.Areas.Customer.Controllers.CarsController.CarsByBrandCacheKey(obj.BrandId));
                 TempData["success"] = "Car updated successfully";
                 return RedirectToAction("Index");
             }
@@ -126,6 +136,7 @@ namespace CarRentoWeb.Areas.Admin.Controllers
             }
             car.Status = status;
             _context.SaveChanges();
+            _cache.Remove(CarRentoWeb.Areas.Customer.Controllers.CarsController.CarsByBrandCacheKey(car.BrandId));
             return Json(new { success = true, status = car.Status });
         }
     }

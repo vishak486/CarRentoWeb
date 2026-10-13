@@ -3,6 +3,7 @@ using CarRentoWeb.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace CarRentoWeb.Areas.Customer.Controllers
 {
@@ -11,20 +12,28 @@ namespace CarRentoWeb.Areas.Customer.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
-        public CarsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        private readonly IMemoryCache _cache;
+
+        public static string CarsByBrandCacheKey(int? brandId) => $"CarsByBrand_{brandId}";
+
+        public CarsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IMemoryCache cache)
         {
             _context = context;
             _userManager = userManager;
+            _cache = cache;
         }
 
         public IActionResult Index(int? brandId)
         {
-            var cars = _context.Cars.Include(b => b.Brand).Include(c => c.CarImages)
+            var cacheKey = CarsByBrandCacheKey(brandId);
+            if (!_cache.TryGetValue(cacheKey, out List<Car>? cars))
+            {
+                cars = _context.Cars.AsNoTracking().Include(b => b.Brand).Include(c => c.CarImages)
                 .Where(c => c.BrandId == brandId && c.Status == "Available").ToList();
 
-            ViewBag.BrandName = _context.Brands.Where(b => b.BrandId == brandId).Select(b => b.BrandName).FirstOrDefault();
-            ViewBag.BrandId = brandId;
-
+                ViewBag.BrandName = _context.Brands.Where(b => b.BrandId == brandId).Select(b => b.BrandName).FirstOrDefault();
+                ViewBag.BrandId = brandId;
+            }
             return View(cars);
         }
 

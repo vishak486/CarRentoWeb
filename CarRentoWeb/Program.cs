@@ -13,6 +13,8 @@ QuestPDF.Settings.License = LicenseType.Community;
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+builder.Services.AddMemoryCache();
+
 builder.Services.AddTransient<IEmailSender, CarRentoWeb.Services.NoOpEmailSender>();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
