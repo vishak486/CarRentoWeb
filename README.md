@@ -100,6 +100,8 @@ CarRentoWeb/
 
 The `Admin` and `Customer` roles are created automatically the first time the Register page is opened. Public registration only assigns the `Customer` role, so to create an admin:
 
+Admin: admin@gmail.com  Password: Admin123
+
 1. Register a normal account.
 2. In the database, change that user's role to `Admin` in the `AspNetUserRoles` table.
 
